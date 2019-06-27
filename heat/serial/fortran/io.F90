@@ -15,12 +15,12 @@ contains
     type(field), intent(in) :: curr
     integer, intent(in) :: iter
     character(len=85) :: filename
-
+    
     ! The actual write routine takes only the actual data
     ! (without ghost layers) so we need array for that
     integer :: full_nx, full_ny, stat
     real(dp), dimension(:,:), allocatable, target :: full_data
-
+    
     full_nx = curr%nx
     full_ny = curr%ny
 
@@ -50,7 +50,7 @@ contains
     integer :: nx, ny, i
     character(len=2) :: dummy
 
-  open(10,file='filename')! TODO: implement the file reading
+  open(10,file=filename)! TODO: implement the file reading
   read(10,fmt='(2x,2i4)') nx,ny ! Read the header
 
     ! Initialize the field metadata (nx, ny, dx, dy). You can use
