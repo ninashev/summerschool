@@ -31,3 +31,4 @@ solutions/programming/fortran/io/io
 *.Rproj
 .RData
 .Rhistory
+*.png
