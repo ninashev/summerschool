@@ -50,20 +50,23 @@ contains
     integer :: nx, ny, i
     character(len=2) :: dummy
 
-    ! TODO: implement the file reading
-    ! Read the header
+  open(10,file='filename')! TODO: implement the file reading
+  read(10,fmt='(2x,2i4)') nx,ny ! Read the header
 
     ! Initialize the field metadata (nx, ny, dx, dy). You can use
     ! the utilite routine set_field_dimensions from module heat
-
+  call set_field_dimensions(field0,nx,ny)
+ 
     ! Allocate space for the data. The array for temperature field contains 
     ! also a halo region (one layer of extra space in all directions which
     ! is used as boundary condition).
 
+  allocate(field0%data(0:nx+1,0:ny+1))
 
-
-    ! Read the data
-
+     ! Read the data
+   do i = 1,nx
+    read(10,*) field0%data(i,1:ny)
+   enddo
 
     ! TODO end
 
