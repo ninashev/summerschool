@@ -3,8 +3,8 @@ program basic
   use iso_fortran_env, only : REAL64
 
   implicit none
-  integer, parameter :: msgsize = 10000000
-  integer :: rc, myid, ntasks
+  integer, parameter :: msgsize = 100
+  integer :: rc, myid, ntasks, nrecv,nsend
   integer :: message(msgsize)
   integer :: receiveBuffer(msgsize)
   type(mpi_status) :: status
@@ -16,24 +16,42 @@ program basic
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, rc)
 
   message = myid
+  !print *,'myid,message() = ',myid,message(myid)
 
   ! Start measuring the time spent in communication
   call mpi_barrier(mpi_comm_world, rc)
   t0 = mpi_wtime()
 
+  nsend = myid + 1
+  nrecv = myid - 1
+  if (nsend > ntasks - 1) then
+  nsend = mpi_proc_null
+  endif
+  if (nrecv < 0) then
+  nrecv = mpi_proc_null
+  endif
+  
+!  if (myid > 0 .AND. myid < ntasks-1) then
+     call mpi_sendrecv(message,msgsize,mpi_integer,nsend,myid+1, &
+     receivebuffer,msgsize,mpi_integer,nrecv,myid,mpi_comm_world,status,rc)
+!  endif
+  print *,'after mpi_sendrecv'  
+!---------------------------------------------------------------  
   ! TODO: Send and receive as defined in the assignment
-  if (myid < ntasks-1) then
-
+ ! if (myid < ntasks-1) then
+  !   nrecv = myid+1
+  !   call mpi_send(message,msgsize,mpi_integer,nrecv,nrecv,mpi_comm_world,rc)
      write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Sender: ', myid, &
           ' Sent elements: ', msgsize, &
           '. Tag: ', myid+1, '. Receiver: ', myid+1
-  end if
-
-  if (myid > 0) then
-
+  !end if
+   
+  !if (myid > 0) then
+  !   nsend = myid - 1
+  !   call mpi_recv(receivebuffer,msgsize,mpi_integer,nsend,nsend+1,mpi_comm_world,status,rc)
      write(*,'(A10,I3,A,I3)') 'Receiver: ', myid, &
           ' First element: ', receiveBuffer(1)
-  end if
+  !end if
 
   ! Finalize measuring the time and print it out
   t1 = mpi_wtime()
