@@ -35,7 +35,7 @@ program basic
      call mpi_sendrecv(message,msgsize,mpi_integer,nsend,myid+1, &
      receivebuffer,msgsize,mpi_integer,nrecv,myid,mpi_comm_world,status,rc)
 !  endif
-  print *,'after mpi_sendrecv'  
+  !print *,'status = ',status  
 !---------------------------------------------------------------  
   ! TODO: Send and receive as defined in the assignment
  ! if (myid < ntasks-1) then
