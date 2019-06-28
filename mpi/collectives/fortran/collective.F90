@@ -1,5 +1,5 @@
 program coll_exer
-  use mpi_f08
+  use mpi
   implicit none
 
   integer, parameter :: n_mpi_tasks = 4
@@ -7,6 +7,8 @@ program coll_exer
   integer :: ntasks, rank, ierr
   integer, dimension(2*n_mpi_tasks) :: sendbuf, recvbuf
   integer, dimension(2*n_mpi_tasks**2) :: printbuf
+
+  integer :: sendcounts(0:3), displs(0:3),recvcounts(0:3),sendcount
 
   call mpi_init(ierr)
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, ierr)
@@ -24,14 +26,48 @@ program coll_exer
 
   ! Print data that will be sent
   call print_buffers(sendbuf)
+  !print *,'The recvbuf:'
+  !call print_buffers(recvbuf)
 
   ! TODO: use a single collective communication call (and maybe prepare
   !       some parameters for the call)
 
+  !call mpi_bcast(sendbuf,8,mpi_integer,0,mpi_comm_world,ierr)
+  !print *,'After bcast'
+  
   ! Print data that was received
   ! TODO: add correct buffer
-  call print_buffers(...)
+  !call print_buffers(sendbuf)
 
+!---
+   !call mpi_scatter(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,0, mpi_comm_world,ierr)
+   !print *,'After scatter'
+   !call print_buffers(recvbuf)
+
+  !---
+   !recvcounts(0:3) = [1,1,2,4]
+   !displs(0:3) = [0,1,2,4]
+
+   !if(rank==0) then
+   !   sendcount = recvcounts(0)
+   !else if(rank==1) then
+   !   sendcount = recvcounts(1)
+   !else if(rank==2) then
+   !   sendcount = recvcounts(2)
+   !elseif(rank==3) then
+   !   sendcount = recvcounts(3)
+   !end if
+   
+!   print *,'displs = ',displs
+   !call mpi_gatherv(sendbuf,sendcount,mpi_integer,recvbuf,recvcounts,displs,mpi_integer, &
+   !     1,mpi_comm_world,ierr)
+   !print *,'After scatterv'
+   !call print_buffers(recvbuf)   
+
+!---
+   call mpi_alltoall(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,mpi_comm_world,ierr)
+   call print_buffers(recvbuf)
+   
   call mpi_finalize(ierr)
 
 contains
