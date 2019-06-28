@@ -9,7 +9,7 @@ program coll_exer
   integer, dimension(2*n_mpi_tasks**2) :: printbuf
 
   integer :: sendcounts(0:3), displs(0:3),recvcounts(0:3),sendcount
-  integer :: color,myid,subcomm
+  integer :: color,myid,subcomm, mysubrank
   
   call mpi_init(ierr)
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, ierr)
@@ -34,7 +34,7 @@ program coll_exer
   !       some parameters for the call)
 
   call mpi_bcast(sendbuf,8,mpi_integer,0,mpi_comm_world,ierr)
-  print *,'After bcast'
+  !print *,'After bcast'
   
   ! Print data that was received
   ! TODO: add correct buffer
@@ -44,7 +44,7 @@ program coll_exer
    call init_buffers
   
    call mpi_scatter(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,0, mpi_comm_world,ierr)
-   print *,'After scatter'
+  ! print *,'After scatter'
    call print_buffers(recvbuf)
 
 !---
@@ -66,29 +66,38 @@ program coll_exer
 !   print *,'displs = ',displs
    call mpi_gatherv(sendbuf,sendcount,mpi_integer,recvbuf,recvcounts,displs,mpi_integer, &
         1,mpi_comm_world,ierr)
-   print *,'After scatterv'
+ !  print *,'After scatterv'
    call print_buffers(recvbuf)   
 
   !---
   call init_buffers
   
   call mpi_alltoall(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,mpi_comm_world,ierr)
-  print *,'after alltoall'
+!  print *,'after alltoall'
   call print_buffers(recvbuf)
 
 
-!---
+!=======================
   call init_buffers
 
-  if(rank==0) then
+  if(rank==0 .OR. rank==1) then
      color = 1
-  else if (rank==1) then
+  else if (rank==2 .OR. rank==3) then
      color = 2
   else
      color = mpi_undefined
   endif
        
-  call mpi_comm_split(mpi_comm_world,color,myid,subcomm,ierr)
+   call mpi_comm_split(mpi_comm_world,color,rank,subcomm,ierr)
+   call mpi_comm_rank(subcomm,mysubrank,ierr)
+   print *,'rankd,mysubrank = ',rank,mysubrank
+
+   !call mpi_bcast(sendbuf,8,mpi_integer,0,subcomm,ierr)
+   !call print_buffers(sendbuf)
+
+   !---
+   call mpi_reduce(sendbuf,recvbuf,8,mpi_integer,mpi_sum,0,subcomm,ierr)
+   call print_buffers(recvbuf)
 
   
   call mpi_finalize(ierr)
