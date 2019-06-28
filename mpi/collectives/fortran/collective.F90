@@ -9,7 +9,8 @@ program coll_exer
   integer, dimension(2*n_mpi_tasks**2) :: printbuf
 
   integer :: sendcounts(0:3), displs(0:3),recvcounts(0:3),sendcount
-
+  integer :: color,myid,subcomm
+  
   call mpi_init(ierr)
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, ierr)
   call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
@@ -32,42 +33,64 @@ program coll_exer
   ! TODO: use a single collective communication call (and maybe prepare
   !       some parameters for the call)
 
-  !call mpi_bcast(sendbuf,8,mpi_integer,0,mpi_comm_world,ierr)
-  !print *,'After bcast'
+  call mpi_bcast(sendbuf,8,mpi_integer,0,mpi_comm_world,ierr)
+  print *,'After bcast'
   
   ! Print data that was received
   ! TODO: add correct buffer
-  !call print_buffers(sendbuf)
+  call print_buffers(sendbuf)
 
 !---
-   !call mpi_scatter(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,0, mpi_comm_world,ierr)
-   !print *,'After scatter'
-   !call print_buffers(recvbuf)
+   call init_buffers
+  
+   call mpi_scatter(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,0, mpi_comm_world,ierr)
+   print *,'After scatter'
+   call print_buffers(recvbuf)
 
-  !---
-   !recvcounts(0:3) = [1,1,2,4]
-   !displs(0:3) = [0,1,2,4]
+!---
+   call init_buffers
+  
+   recvcounts(0:3) = [1,1,2,4]
+   displs(0:3) = [0,1,2,4]
 
-   !if(rank==0) then
-   !   sendcount = recvcounts(0)
-   !else if(rank==1) then
-   !   sendcount = recvcounts(1)
-   !else if(rank==2) then
-   !   sendcount = recvcounts(2)
-   !elseif(rank==3) then
-   !   sendcount = recvcounts(3)
-   !end if
+   if(rank==0) then
+      sendcount = recvcounts(0)
+   else if(rank==1) then
+      sendcount = recvcounts(1)
+   else if(rank==2) then
+      sendcount = recvcounts(2)
+   elseif(rank==3) then
+      sendcount = recvcounts(3)
+   end if
    
 !   print *,'displs = ',displs
-   !call mpi_gatherv(sendbuf,sendcount,mpi_integer,recvbuf,recvcounts,displs,mpi_integer, &
-   !     1,mpi_comm_world,ierr)
-   !print *,'After scatterv'
-   !call print_buffers(recvbuf)   
+   call mpi_gatherv(sendbuf,sendcount,mpi_integer,recvbuf,recvcounts,displs,mpi_integer, &
+        1,mpi_comm_world,ierr)
+   print *,'After scatterv'
+   call print_buffers(recvbuf)   
+
+  !---
+  call init_buffers
+  
+  call mpi_alltoall(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,mpi_comm_world,ierr)
+  print *,'after alltoall'
+  call print_buffers(recvbuf)
+
 
 !---
-   call mpi_alltoall(sendbuf,2,mpi_integer,recvbuf,2,mpi_integer,mpi_comm_world,ierr)
-   call print_buffers(recvbuf)
-   
+  call init_buffers
+
+  if(rank==0) then
+     color = 1
+  else if (rank==1) then
+     color = 2
+  else
+     color = mpi_undefined
+  endif
+       
+  call mpi_comm_split(mpi_comm_world,color,myid,subcomm,ierr)
+
+  
   call mpi_finalize(ierr)
 
 contains
