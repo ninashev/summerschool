@@ -9,7 +9,9 @@ program basic
   integer :: receiveBuffer(msgsize)
   type(mpi_status) :: status1,status2
   type(mpi_request) :: request1, request2
-
+  type(mpi_request) :: request_send,request_recv
+  integer :: i
+  
   real(REAL64) :: t0, t1
 
   call mpi_init(rc)
@@ -17,54 +19,33 @@ program basic
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, rc)
 
   message = myid
-  !print *,'myid,message() = ',myid,message(myid)
 
   ! Start measuring the time spent in communication
   call mpi_barrier(mpi_comm_world, rc)
   t0 = mpi_wtime()
 
-  !nsend = myid + 1
-  !nrecv = myid - 1
-  !if (nsend > ntasks - 1) then
-  !nsend = mpi_proc_null
-  !endif
-  !if (nrecv < 0) then
-  !nrecv = mpi_proc_null
-  !endif
-  
- 
-  !   call mpi_sendrecv(message,msgsize,mpi_integer,nsend,myid+1, &
-  !        receivebuffer,msgsize,mpi_integer,nrecv,myid,mpi_comm_world,status,rc)
-     
-  !print *,'status = ',status  
+  request_send = mpi_request_null
+  request_recv = mpi_request_null
 
-  request1 = mpi_request_null
-  request2 = mpi_request_null
-!---------------------------------------------------------------  
-  ! TODO: Send and receive as defined in the assignment
+  !Initialize send/request objects
   if (myid < ntasks-1) then
-     nrecv = myid+1
-!!!call mpi_send(message,msgsize,mpi_integer,nrecv,nrecv,mpi_comm_world,rc)
-     call mpi_isend(message,msgsize,mpi_integer,nrecv,nrecv,mpi_comm_world,request1,rc)
-  !   call mpi_wait(request1,status1,rc)
-  !   write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Sender: ', myid, &
-  !        ' Sent elements: ', msgsize, &
-  !        '. Tag: ', myid+1, '. Receiver: ', myid+1
-  end if
-   
+   call mpi_send_init(message,msgsize,mpi_integer,myid+1,myid+1,mpi_comm_world,request_send,rc);
+  endif
   if (myid > 0) then
-     nsend = myid - 1
-!!!call mpi_recv(receivebuffer,msgsize,mpi_integer,nsend,nsend+1,mpi_comm_world,status,rc)
-     call mpi_irecv(receivebuffer,msgsize,mpi_integer,nsend,nsend+1,mpi_comm_world,request2,rc)
- !    call mpi_wait(request2,status2,rc)
- !    write(*,'(A10,I3,A,I3)') 'Receiver: ', myid, &
- !         ' First element: ', receiveBuffer(1)
-  end if
+   call mpi_recv_init(receivebuffer,msgsize,mpi_integer,myid-1,myid,mpi_comm_world,request_recv,rc);
+  endif
 
-  
-  !call mpi_wait(request1,mpi_status_ignore,rc)
-  call mpi_wait(request1,status1,rc)
-  call mpi_wait(request2,status2,rc)
+ 
+    if (myid < ntasks-1) then
+       call mpi_start(request_send,rc)
+    endif
+    if (myid > 0) then
+       call mpi_start(request_recv,rc)
+    endif
+    
+    call mpi_wait(request_send,mpi_status_ignore)
+    call mpi_wait(request_recv,mpi_status_ignore)
+ 
    ! if(myid < ntasks-1)
        write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Sender: ', myid, &
           ' Sent elements: ', msgsize, &
