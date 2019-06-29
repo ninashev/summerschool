@@ -1,11 +1,15 @@
 program datatype1
-  use mpi_f08
+  use mpi
   implicit none
 
   integer, dimension(8,8) :: array
   integer :: rank, ierr
+  integer, dimension(4) :: blocklength, displs
   !TODO: declare variable for datatype
+  !type(mpi_datatype) :: newtype - does not work with "use mpi"
+  integer :: newtype
   integer :: i, j
+  type(mpi_status) :: status
 
   call mpi_init(ierr)
   call mpi_comm_rank(MPI_COMM_WORLD, rank ,ierr)
@@ -28,11 +32,25 @@ program datatype1
      end do
   end if
 
-
+ ! if(rank==0) then
+     blocklength = [1,2,3,4]
+     displs = [0,17,34,51]
+ ! endif
+  
   !TODO: create datatype describing one row, use mpi_type_vector
+!   call mpi_type_vector(8,1,8,mpi_integer,newtype,ierr)
+    call mpi_type_indexed(4,blocklength,displs,mpi_integer,newtype,ierr)
+    call mpi_type_commit(newtype,ierr)
 
   !TODO: send first row of matrix from rank 0 to 1
-
+  if (rank==0) then
+     !    call mpi_send(array(2,1),1,newtype,1,10,mpi_comm_world,ierr)
+     call mpi_send(array,1,newtype,1,10,mpi_comm_world,ierr)
+  endif
+  if(rank==1) then
+    call mpi_recv(array,1,newtype,0,10,mpi_comm_world,status,ierr)
+  endif
+  
   ! Print out the result
   if (rank == 1) then
      write(*,*) 'Received data'
@@ -42,7 +60,8 @@ program datatype1
   end if
 
   !TODO free datatype
-
+ call mpi_type_free(newtype,ierr)
+  
   call mpi_finalize(ierr)
 
 end program datatype1
