@@ -14,7 +14,7 @@ program vectors
      write(*,'(A,3G10.4)') ' v1 + v2 =', v1 + v2
      write(*,'(A,3G10.4)') ' v1 - v2 =', v1 - v2
      write(*,'(A,3G10.4)') ' v1 . v2 =', v1 * v2
-     write(*,'(A,3G10.4)') ' v1 x v2 =', v1 .x. v2
+!     write(*,'(A,3G10.4)') ' v1 x v2 =', v1 .x. v2
   end do parser
 
 end program vectors

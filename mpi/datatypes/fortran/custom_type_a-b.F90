@@ -1,13 +1,12 @@
 program datatype1
-  use mpi
+  use mpi_f08
   implicit none
 
   integer, dimension(8,8) :: array
   integer :: rank, ierr
   integer, dimension(4) :: blocklength, displs
   !TODO: declare variable for datatype
-  !type(mpi_datatype) :: newtype - does not work with "use mpi"
-  integer :: newtype
+  type(mpi_datatype) :: newtype
   integer :: i, j
   type(mpi_status) :: status
 

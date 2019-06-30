@@ -1,11 +1,18 @@
 program loops
   implicit none
-  ! TODO define parameters nx and ny
-  ! TODO: define real-valued array A
+  integer, parameter :: nx=10,ny=10 ! TODO define parameters nx and ny
+  real :: A(nx,ny) ! TODO: define real-valued array A
+  real :: x,y
   integer :: i, j
 
   ! TODO initialize array A here
-
+  do i = 1,10,1
+     do j = 1,10,1
+        x = i*0.1
+        y = j*0.1
+        A(i,j) = x**2 + y**2
+     enddo
+  enddo
 
 
   !--------------------------------------------------

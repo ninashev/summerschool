@@ -8,32 +8,23 @@ contains
 
     real, dimension(:,:), allocatable, intent(out) :: field
     character(len=*), intent(in) :: filename
+    integer :: nx, ny, i,j
 
     ! TODO: implement function that will:
-    ! open the file
-    ! read the first header line to get nx and ny
-    ! allocate matrix called field
-    ! read rest of the file into field
-    ! close the file
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    open(10,file='bottle.dat', status='old')! open the file
+    read(10,fmt='(2x,2i4)') nx,ny ! read the first header line to get nx and ny
+!    write(*,*) nx,ny
+    allocate(field(nx,ny)) ! allocate matrix called field
+    do i =1,nx
+!       do j = 1,ny
+          read(10,*) field(i,1:ny) ! read rest of the file into field
+!       end do 
+    end do
+    close(10) ! close the file
 
   end subroutine read_field
 
+  
   ! Output routine, saves the temperature distribution as a png image
   subroutine write_field(field, iter)
     use iso_fortran_env, only : REAL64

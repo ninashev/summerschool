@@ -1,5 +1,5 @@
 program coll_exer
-  use mpi
+  use mpi_f08
   implicit none
 
   integer, parameter :: n_mpi_tasks = 4
@@ -9,7 +9,12 @@ program coll_exer
   integer, dimension(2*n_mpi_tasks**2) :: printbuf
 
   integer :: sendcounts(0:3), displs(0:3),recvcounts(0:3),sendcount
-  integer :: color,myid,subcomm, mysubrank
+  !integer :: color,myid,subcomm, mysubrank
+  integer :: color,myid,mysubrank
+  type(mpi_comm) :: subcomm
+  
+  type(mpi_status) :: status1
+  type(mpi_request) :: request1 
   
   call mpi_init(ierr)
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, ierr)
@@ -33,8 +38,9 @@ program coll_exer
   ! TODO: use a single collective communication call (and maybe prepare
   !       some parameters for the call)
 
-  call mpi_bcast(sendbuf,8,mpi_integer,0,mpi_comm_world,ierr)
-  !print *,'After bcast'
+  !call mpi_bcast(sendbuf,8,mpi_integer,0,mpi_comm_world,ierr)
+  call mpi_ibcast(sendbuf,8,mpi_integer,0,mpi_comm_world,request1,ierr)
+  call mpi_wait(request1,status1,ierr)
   
   ! Print data that was received
   ! TODO: add correct buffer
@@ -92,8 +98,8 @@ program coll_exer
    call mpi_comm_rank(subcomm,mysubrank,ierr)
    print *,'rankd,mysubrank = ',rank,mysubrank
 
-   !call mpi_bcast(sendbuf,8,mpi_integer,0,subcomm,ierr)
-   !call print_buffers(sendbuf)
+   call mpi_bcast(sendbuf,8,mpi_integer,0,subcomm,ierr)
+   call print_buffers(sendbuf)
 
    !---
    call mpi_reduce(sendbuf,recvbuf,8,mpi_integer,mpi_sum,0,subcomm,ierr)
