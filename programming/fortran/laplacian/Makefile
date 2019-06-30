@@ -1,5 +1,5 @@
 ifeq ($(COMP),)
-COMP=cray
+COMP=gnu
 endif
 
 ifeq ($(COMP),cray)
@@ -10,8 +10,8 @@ endif
 
 ifeq ($(COMP),gnu)
 CC=gcc
-FC=gfortran
-FCFLAGS=-Wall
+FC=gfortran 
+FCFLAGS=-Wall -g
 endif
 
 ifeq ($(COMP),intel)
