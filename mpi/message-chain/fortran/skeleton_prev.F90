@@ -32,25 +32,17 @@ program basic
   !nrecv = mpi_proc_null
   !endif
   
- 
   !   call mpi_sendrecv(message,msgsize,mpi_integer,nsend,myid+1, &
   !        receivebuffer,msgsize,mpi_integer,nrecv,myid,mpi_comm_world,status,rc)
      
   !print *,'status = ',status  
 
+
+
   request1 = mpi_request_null
   request2 = mpi_request_null
 
-
-// Initialize send/request objects
-MPI_Recv_init(message,msgsize,mpi_integer,myid+1,myid+1,mpi_comm_world,recv_obj,rc);
-MPI_Send_init(receivebuffer,msgsize,mpi_integer,myid-1,myid,mpi_comm_world,send_obj,rc);
-
-
-
-
-
-  !---------------------------------------------------------------  
+!---------------------------------------------------------------  
   ! TODO: Send and receive as defined in the assignment
   if (myid < ntasks-1) then
      nrecv = myid+1
