@@ -19,8 +19,8 @@ program datatype_struct
   integer(KIND=MPI_ADDRESS_KIND) :: disp(cnt)
   integer(KIND=MPI_ADDRESS_KIND) :: lb, extent
   real(real64) :: t1, t2
+  type(mpi_status) :: status
 
-  integer :: displs(3), blocklengths(3)
 
   call MPI_INIT(ierror)
   call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierror)
@@ -46,19 +46,36 @@ program datatype_struct
    disp(2) = disp(2) - disp(1)
    disp(1) = 0
      types = [mpi_real,mpi_integer,mpi_character]
-  endif
-  
+  endif  
+
   ! TODO: define the datatype for type particle
   call mpi_type_create_struct(cnt,blocklen,disp,types,temp_type,ierror)
   call mpi_type_commit(temp_type,ierror)
-  
+
+     write(*,*) 'temp_type = ',temp_type
+
+ if (myid==0) then
+  call mpi_send(particles,n,temp_type,1,10,mpi_comm_world,ierror)
+   elseif(myid==1) then
+  call mpi_recv(particles,n,temp_type,0,10,mpi_comm_world,status,ierror) 
+ endif
+
+ if (myid == 1) then
+  write(*,*) 'ierror after mpi_recv = ',ierror
+ endif
+
   !--call mpi_type_create_subarray(ndims,sizes,subsizes,offsets,order, &
-  !--     mpi_integer,newtype)
+  !--     mpi_integer,temp_type,ierror)
   
   ! TODO: Check extent.
   ! (Not really neccessary on most systems.)
+
   ! TODO: resize the particle_mpi_type if needed
+  call mpi_get_address(particles(1),disp(1),ierror)
+  call mpi_get_address(particles(2),disp(2),ierror)
+
   if(extent /= disp(2) - disp(1)) then
+   write(*,*) 'disp(2) - disp(1) = ',disp(2) - disp(1)
      ! TODO: resize the particle_mpi_type if needed
   end if
 
