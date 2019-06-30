@@ -1,5 +1,5 @@
 program exchange
-  use mpi
+  use mpi_f08
   implicit none
   integer, parameter :: msgsize = 100000
   integer :: rc, myid, ntasks, i
