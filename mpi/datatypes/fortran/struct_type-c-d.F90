@@ -36,20 +36,20 @@ program datatype_struct
   end if
 
   if(myid==0) then
-     call mpi_get_address(particles(1)%coords,displs(1),ierror)
-     call mpi_get_address(particles(1)%charge,displs(2),ierror)
-     call mpi_get_address(particles(1)%label,displs(3),ierror)
+     call mpi_get_address(particles(1)%coords,disp(1),ierror)
+     call mpi_get_address(particles(1)%charge,disp(2),ierror)
+     call mpi_get_address(particles(1)%label,disp(3),ierror)
      
-     blocklengths = [3,1,2]
-     !displs = [0,displs(2)-displs(1),displs(3)-displs(1)]
-     displs(2) = displs(2)-displs(1)
-     displs(3) = displs(3)-displs(1)
-     displs(1) = 0
+     blocklen = [3,1,2]
+     !disp = [0,disp(2)-disp(1),disp(3)-disp(1)]
+   disp(3) = disp(3) - disp(1)
+   disp(2) = disp(2) - disp(1)
+   disp(1) = 0
      types = [mpi_real,mpi_integer,mpi_character]
   endif
   
   ! TODO: define the datatype for type particle
-  call mpi_type_create_struct(3,blocklengths,displs,types,temp_type,ierror)
+  call mpi_type_create_struct(cnt,blocklen,disp,types,temp_type,ierror)
   call mpi_type_commit(temp_type,ierror)
   
   !--call mpi_type_create_subarray(ndims,sizes,subsizes,offsets,order, &
