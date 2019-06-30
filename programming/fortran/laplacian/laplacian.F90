@@ -13,7 +13,6 @@ program laplacian
   dx = 1.0/real(nx-1)
   dy = 1.0/real(ny-1)
   allocate (A(nx,ny), L(nx,ny)) ! TODO: allocate matrices
-!  write(*,*) 'dx,dy = ',dx,dy
 
   ! initialize array A(x,y) = (x^2 + y^2) in the domain [0:1,0:1]
   y = 0.0
@@ -44,11 +43,11 @@ program laplacian
   end do
 
   write(*,*) "Laplacian of the array:"
-  do i = 2,nx-1
-     do j = 2,ny-1
-        write(*,'(*(G9.1))') i,j, L(i,j)
-     end do
-  end do
+!  do i = 2,nx-1
+       do i = 2,nx-1
+          write(*,'(*(G9.1))') L(i,2:ny-1)
+       end do
+!  end do
   
 
   ! Analytically, the Laplacian of the function is nabla^2 A(x,y) = 4
