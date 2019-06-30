@@ -1,5 +1,5 @@
 program hello
-  use mpi
+  use mpi_f08
 
   integer :: rp,ierror,rank,size
   call mpi_init(rp)
