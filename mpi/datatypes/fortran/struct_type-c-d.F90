@@ -19,7 +19,6 @@ program datatype_struct
   integer(KIND=MPI_ADDRESS_KIND) :: disp(cnt)
   integer(KIND=MPI_ADDRESS_KIND) :: lb, extent
   real(real64) :: t1, t2
-  type(mpi_status) :: status
 
 
   call MPI_INIT(ierror)
