@@ -40,6 +40,20 @@ contains
     ! TODO: Implement a function that writers the whole array of elements
     !       to a file so that single process is responsible for the file io
 
+    !print *,'datasize,localsize*ntasks = ',datasize,localsize*ntasks
+    if (datasize /= localsize*ntasks) then
+       print *,'datasize /= localsize*ntasks'
+       stop
+    endif
+    
+    !call mpi_gather(localvector,localsize,mpi_integer,fullvector,localsize*ntasks, &
+    call mpi_gather(localvector,localsize,mpi_integer,fullvector,localsize, & 
+    mpi_integer,0,mpi_comm_world,rc)
+
+    if(my_id == 0) then
+       write(*,*) 'The full vector is ',fullvector
+    endif
+    
   end subroutine single_writer
 
 end program pario
