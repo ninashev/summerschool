@@ -35,40 +35,26 @@ program datatype_struct
      end do
   end if
 
-  if(myid==0) then
      call mpi_get_address(particles(1)%coords,disp(1),ierror)
      call mpi_get_address(particles(1)%charge,disp(2),ierror)
      call mpi_get_address(particles(1)%label,disp(3),ierror)
      
-     blocklen = [3,1,2]
-     !disp = [0,disp(2)-disp(1),disp(3)-disp(1)]
-   disp(3) = disp(3) - disp(1)
-   disp(2) = disp(2) - disp(1)
-   disp(1) = 0
-     types = [mpi_real,mpi_integer,mpi_character]
-  endif  
+   blocklen = [3,1,2]
+    disp(3) = disp(3) - disp(1)
+    disp(2) = disp(2) - disp(1)
+    disp(1) = 0
+   types = [mpi_real,mpi_integer,mpi_character]
 
   ! TODO: define the datatype for type particle
   call mpi_type_create_struct(cnt,blocklen,disp,types,temp_type,ierror)
   call mpi_type_commit(temp_type,ierror)
-
-     write(*,*) 'temp_type = ',temp_type
-
- if (myid==0) then
-  call mpi_send(particles,n,temp_type,1,10,mpi_comm_world,ierror)
-   elseif(myid==1) then
-  call mpi_recv(particles,n,temp_type,0,10,mpi_comm_world,status,ierror) 
- endif
-
- if (myid == 1) then
-  write(*,*) 'ierror after mpi_recv = ',ierror
- endif
 
   !--call mpi_type_create_subarray(ndims,sizes,subsizes,offsets,order, &
   !--     mpi_integer,temp_type,ierror)
   
   ! TODO: Check extent.
   ! (Not really neccessary on most systems.)
+  call mpi_type_get_extent(temp_type,lb,extent)
 
   ! TODO: resize the particle_mpi_type if needed
   call mpi_get_address(particles(1),disp(1),ierror)
@@ -82,13 +68,15 @@ program datatype_struct
   t1 = MPI_WTIME()
   if(myid == 0) then
      do i = 1, 1000
-        call MPI_SEND(particles, n, particle_mpi_type, 1, i, &
-             & MPI_COMM_WORLD, ierror)
+!       call MPI_SEND(particles, n, particle_mpi_type, 1, i, &
+!            & MPI_COMM_WORLD, ierror)
+    call MPI_SEND(particles,n,temp_type,1,i,MPI_COMM_WORLD,ierror)
      end do
   else if(myid == 1) then
      do i = 1, 1000
-        call MPI_RECV(particles, n, particle_mpi_type, 0, i, &
-             & MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+!        call MPI_RECV(particles, n, particle_mpi_type, 0, i, &
+!             & MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+    call MPI_RECV(particles,n,temp_type,0,i,MPI_COMM_WORLD,MPI_STATUS_IGNORE,ierror)
      end do
   end if
   t2 = MPI_WTIME()
@@ -96,7 +84,8 @@ program datatype_struct
   write(*,*) "Time: ", myid, (t2-t1) / 1000d0
   write(*,*) "Check:", myid, particles(n)%coords(1)
 
-  call MPI_TYPE_free(particle_mpi_type, ierror)
+ ! call MPI_TYPE_free(particle_mpi_type, ierror)
+  call MPI_TYPE_free(temp_type, ierror)
   call MPI_FINALIZE(ierror)
 
 end program datatype_struct
