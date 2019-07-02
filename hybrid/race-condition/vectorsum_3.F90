@@ -26,6 +26,8 @@ program vectorsum
   end do
  !$omp end do
  !$omp critical(dosum)
+  !  here 'dosum' is just a name of this critical part,
+  !  can be used in other places with the same or different name
   sum = sum + psum
  !$omp end critical(dosum)
 !$omp end parallel
