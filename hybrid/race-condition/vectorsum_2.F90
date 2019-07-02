@@ -18,17 +18,10 @@ program vectorsum
 
   sum = 0
 
-!$omp parallel shared(vecA) private(i,psum)
-  psum = 0
- !$omp do
+!$omp parallel do shared(vecA) private(i) reduction(+:sum)
   do i = 1, nx
-     psum = psum + vecA(i)
+     sum = sum + vecA(i)
   end do
- !$omp end do
- !$omp critical(dosum)
-  sum = sum + psum
- !$omp end critical(dosum)
-!$omp end parallel
-  write(*,*) 'sum: ', sum
-  
+!$omp end parallel do  
+  write(*,*) 'Sum: ', sum
 end program vectorsum
