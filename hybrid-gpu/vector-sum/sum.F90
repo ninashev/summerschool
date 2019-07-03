@@ -20,6 +20,11 @@ program vectorsum
   ! TODO
   ! Implement vector addition on device with OpenACC
   ! vecC = vecA + vecB
+!$acc kernels loop
+ do i = 1,nx
+  vecC(i) = vecA(i) + vecB(i)
+ enddo
+!$acc end kernels loop
 
   ! Compute the check value
   write(*,*) 'Reduction sum: ', sum(vecC)
